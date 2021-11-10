@@ -1,0 +1,92 @@
+#!/bin/bash
+
+help()
+{
+	#Display --help
+	printf "hashcompare helps you compare a file with a given checksum.\n
+Usage: hashcompare FILE HASH [OPTIONS]\n
+Options:\n"
+	printf "%-20s" "-5, --md5"
+	printf "MD5 (default)\n"
+	printf "%-20s"  "-1, --sha1"
+	printf "SHA1\n"
+	printf "%-20s" "-256, --sha256"
+	printf "SHA256\n"
+	printf "%-20s" "-512, --sha512"
+	printf "SHA512\n"
+	printf "%-20s" "--help"
+	printf "Displays this message\n\n"
+}
+
+compare()
+{
+	#Compare two strings:
+	if [ $1 = $2 ]; then
+		printf "True. Checksums matched.\n"
+		exit 0
+	else
+		printf "False. Checksums did not match.\n"
+		exit 1
+	fi
+}
+
+declare -i arg_count=$#
+
+if [ ${arg_count} -gt 3 ]; then
+	printf "Too many arguments. Use --help for more information.\n"
+	exit 3
+fi
+
+case ${arg_count} in
+	0)
+		#Display help:
+		help
+		;;
+	1)
+		#Only one argument. Maybe asked for help?:
+		if [ $1 = "--help" ]; then
+                	help
+		else
+			printf "Too few arguments. Use --help for more information.\n"
+			exit 4
+		fi
+                ;;
+	2)
+		#Two arguments. Does the file exist?:
+		if [[ ! -f "$1" ]]; then
+			printf "No such file.\n"
+			exit 2
+		fi
+		#Go with default, MD5:
+		file_hash=$(md5sum "$1" | cut -d " " -f 1)
+		compare "${file_hash}" "$2"
+		;;
+        3) 
+		#Three arguments. Does the file exist?:
+		if [[ ! -f "$1" ]]; then
+			printf "No such file.\n"
+			exit 2
+		fi
+		#Check whether option is valid:
+		if [ $3 = "-5" ] || [ $3 = "--md5" ]; then
+			#MD5 asked:
+			file_hash=$(md5sum "$1" | cut -d " " -f 1)
+			compare "${file_hash}" "$2"
+		elif [ $3 = "-1" ] || [ $3 = "--sha1" ]; then
+			#SHA1 asked:
+			file_hash=$(sha1sum "$1" | cut -d " " -f 1)
+			compare "${file_hash}" "$2"
+		elif [ $3 = "-256" ] || [ $3 = "--sha256" ]; then
+			#SHA256 asked:
+			file_hash=$(sha256sum "$1" | cut -d " " -f 1)
+			compare "${file_hash}" "$2"
+		elif [ $3 = "-512" ] || [ $3 = "--sha512" ]; then
+			#SHA512 asked:
+			file_hash=$(sha512sum "$1" | cut -d " " -f 1)
+			compare "${file_hash}" "$2"
+		else
+			printf "Unknown option. Use --help for more information.\n"
+			exit 5
+		fi
+		;;
+esac
