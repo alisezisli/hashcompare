@@ -23,3 +23,11 @@ True. Checksums matched.
 ali@zion:~$ hashcompare /usr/bin/hashcompare 8eb8c7875adfa12345a900d1da16f3a3 --md5
 False. Checksums did not match.
 ```
+
+# Exit Codes
+- 0: Checksums matched
+- 1: Checksums did not match
+- 2: No such file
+- 3: Too many arguments
+- 4: Too few arguments
+- 5: Unknown option
